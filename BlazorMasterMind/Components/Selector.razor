@@ -1,0 +1,17 @@
+﻿@using BlazorMasterMind.Modeles
+
+<MudPaper Width="7%">
+    <MudCard>
+        <MudCardMedia @onclick="GetColorToDisplay" Style=@("background-color: " + DisplayerData.ColorMasterMind.GetDescription()) Height="50" />
+    </MudCard>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public Cell DisplayerData { get; set; } = new(ColorMasterMind.Gray);
+
+    private async Task GetColorToDisplay()
+    {
+        await Task.Run(() => DisplayerData.ColorMasterMind = DisplayerData.ColorMasterMind.GetNextValue<ColorMasterMind>());
+    }
+}

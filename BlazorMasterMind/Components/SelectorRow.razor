@@ -1,0 +1,37 @@
+﻿@using BlazorMasterMind.Service
+@inject GameService GameService
+
+<div style="box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3)">
+    <div style="display: flex; justify-content: center; align-items: flex-start; margin-top: 20px;">
+        @for (int i = 0; i < GameService.RowSize; i++)
+        {
+            if (i != 0)
+            {
+                <div style="margin-inline:10px"></div>
+            }
+            <Selector DisplayerDATA=@(Selectors.ElementAt(i))></Selector>
+        }
+    </div>
+    <div style="margin-top: 10px">
+        <MudButton Disabled="@processing" OnClick="OnSendRow" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">
+            @if (processing)
+            {
+                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                <MudText Class="ms-2">Processing</MudText>
+            }
+            else
+            {
+                <MudText>Send</MudText>
+            }
+        </MudButton>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Cell[] Selectors { get; set; }
+    [Parameter]
+    public EventCallback OnSendRow { get; set; }
+
+    public bool processing = false;  
+}

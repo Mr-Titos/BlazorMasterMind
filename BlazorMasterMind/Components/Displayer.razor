@@ -1,0 +1,15 @@
+﻿@using BlazorMasterMind.Modeles
+
+<MudPaper Width="7%">
+    <MudCard>
+        <MudCardMedia Style=@("background-color: " + @DisplayerDATA.ColorMasterMind.GetDescription()) Height="50" />
+        <MudCardMedia Style=@("background-color: " + @DisplayerDATA.ColorIndicator.GetDescription()) Height="7">
+        </MudCardMedia>
+    </MudCard>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public Cell DisplayerDATA { get; set; }
+
+}

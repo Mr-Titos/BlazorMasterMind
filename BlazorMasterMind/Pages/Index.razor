@@ -1,7 +1,48 @@
 ﻿@page "/"
+@using BlazorMasterMind.Service
+@inject GameService GameService
+
 
 <PageTitle>Index</PageTitle>
+<div style="display: flex; flex-direction: column; height: 100vh;">
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
+        <DisplayerRow Displayers=Displayers></DisplayerRow>
+    </div>
+</div>
+<div style="position: fixed; bottom: 2%; width: 60%; justify-content: center; align-items: center; text-align: center;">
+    <SelectorRow Selectors=Selectors @ref="SelectorRowRef" OnSendRow="HandleSendRow" />
+</div>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
-<MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
-<MudAlert Severity="Severity.Normal">You can find documentation and examples on our website here: <MudLink Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink></MudAlert>
+@code{
+    public Cell[] Displayers { get; set; }
+    public Cell[] Selectors { get; set; }
+
+    private SelectorRow SelectorRowRef;
+
+
+    // TODO : Why this function is called 3 times ?
+    // ANSWER : In _Host.cshtml => An option can be choosed between Server and ServerPreRendered 
+    // => the pre rendering call this function once at the launch of the server and once before the user load the page, only then it's the real call
+    protected override void OnInitialized()
+    {
+        Displayers = new Cell[GameService.RowSize];
+        Displayers[0] = (new Cell(ColorMasterMind.Gray, ColorIndicator.Warning));
+        Displayers[1] = (new Cell(ColorMasterMind.Black, ColorIndicator.Error));
+        Displayers[2] = (new Cell(ColorMasterMind.Blue, ColorIndicator.Success));
+        Displayers[3] = (new Cell(ColorMasterMind.Purple, ColorIndicator.Warning));
+        Displayers[4] = (new Cell(ColorMasterMind.Yellow, ColorIndicator.Warning));
+
+
+        Selectors = Task.Run(() => GameService.GenerateRandomRow()).Result;
+        GameService.StartGame();
+    }
+
+    private async Task HandleSendRow()
+    {
+        SelectorRowRef.processing = true;
+        await Task.Run(() => GameService.ProcessRow(Selectors));
+        Console.WriteLine("ALLO");
+        await Task.Delay(1000); // Just to flex the processing button :D
+        SelectorRowRef.processing = false;
+    }
+}

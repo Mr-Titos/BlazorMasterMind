@@ -1,0 +1,18 @@
+﻿@using BlazorMasterMind.Service
+@inject GameService GameService
+
+<div style="display: flex; justify-content: center; align-items: flex-start; margin-top: 20px; width: 80%; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);">
+    @for(int i = 0; i < GameService.RowSize; i++)
+    {
+        if (i != 0)
+        {
+            <div style="margin-inline:10px"></div>
+        }
+        <Displayer DisplayerDATA=@(Displayers.ElementAt(i))></Displayer>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Cell[] Displayers { get; set; }
+}
