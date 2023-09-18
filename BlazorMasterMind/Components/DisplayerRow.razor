@@ -1,8 +1,8 @@
 ﻿@using BlazorMasterMind.Service
 @inject GameService GameService
 
-<div style="display: flex; justify-content: center; align-items: flex-start; margin-top: 20px; width: 80%; box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);">
-    @for(int i = 0; i < GameService.RowSize; i++)
+<div style="display: flex; justify-content: center; align-items: flex-start; margin-top: 20px; width: 100%;">
+    @for(int i = 0; i < RowSize; i++)
     {
         if (i != 0)
         {
@@ -15,4 +15,7 @@
 @code {
     [Parameter]
     public Cell[] Displayers { get; set; }
+
+    [Parameter]
+    public int RowSize { get; set; } = 5;
 }

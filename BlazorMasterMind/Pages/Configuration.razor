@@ -1,0 +1,51 @@
+﻿@page "/configuration"
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+@inject GameService GameService
+
+<PageTitle>Configuration</PageTitle>
+<h3>@errorTitle</h3>
+<p>@errorDetails</p>
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudCard>
+            <MudCardContent>
+                <MudTextField Label="Row Size"
+                @bind-Value="rowSize" />
+                <MudTextField Label="Number of guesses" Class="mt-3"
+                @bind-Value="numberOfGuesses" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Button" OnClick="@OnValidSubmit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Register</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    public int numberOfGuesses { get; set; }
+    public int rowSize { get; set; }
+    public string errorTitle { get; set; } = String.Empty;
+    public string errorDetails { get; set; } = String.Empty;
+
+    private void OnValidSubmit()
+    {
+        if ((rowSize > 2 && rowSize < 13) && numberOfGuesses > 1)
+        {
+            GameService.RowSize = rowSize;
+            GameService.NbGuess = numberOfGuesses;
+            Console.WriteLine("---------\nConfiguration saved\n---------");
+            NavigationManager.NavigateTo("/");
+        } else
+        {
+            errorTitle = "An error occured !";
+            errorDetails = "Row size between 3 and 12 ! Number of guesses > 1";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        rowSize = GameService.RowSize;
+        numberOfGuesses = GameService.NbGuess;
+    }
+}

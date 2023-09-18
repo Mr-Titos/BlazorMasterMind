@@ -2,8 +2,8 @@
 @inject GameService GameService
 
 <div style="box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3)">
-    <div style="display: flex; justify-content: center; align-items: flex-start; margin-top: 20px;">
-        @for (int i = 0; i < GameService.RowSize; i++)
+    <div style="display: flex; justify-content: center; align-items: flex-start;">
+        @for (int i = 0; i < RowSize; i++)
         {
             if (i != 0)
             {
@@ -13,7 +13,7 @@
         }
     </div>
     <div style="margin-top: 10px">
-        <MudButton Disabled="@processing" OnClick="OnSendRow" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">
+        <MudButton Disabled="@(processing || finished)" OnClick="OnSendRow" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">
             @if (processing)
             {
                 <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
@@ -33,5 +33,10 @@
     [Parameter]
     public EventCallback OnSendRow { get; set; }
 
-    public bool processing = false;  
+    [Parameter]
+    public int RowSize { get; set; } = 5;
+
+    public bool processing = false;
+
+    public bool finished = false;
 }

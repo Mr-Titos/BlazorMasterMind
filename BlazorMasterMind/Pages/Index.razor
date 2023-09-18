@@ -1,48 +1,69 @@
 ﻿@page "/"
-@using BlazorMasterMind.Service
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
 @inject GameService GameService
 
-
-<PageTitle>Index</PageTitle>
-<div style="display: flex; flex-direction: column; height: 100vh;">
-    <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
-        <DisplayerRow Displayers=Displayers></DisplayerRow>
+<PageTitle>Home</PageTitle>
+<div id="displayers" style="display: flex; flex-direction: column; max-height: calc(100vh - 50vh); overflow-y: auto;">
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-end;">
+        @foreach (Cell[]? displayer in GameService.RowsGuessed)
+        {
+            <DisplayerRow RowSize=GameService.RowSize Displayers=displayer></DisplayerRow>
+        }
     </div>
 </div>
-<div style="position: fixed; bottom: 2%; width: 60%; justify-content: center; align-items: center; text-align: center;">
-    <SelectorRow Selectors=Selectors @ref="SelectorRowRef" OnSendRow="HandleSendRow" />
+<div id="selectors" style="position: fixed; bottom: 2%; width: 80%; justify-content: center; align-items: center; text-align: center;">
+    <SelectorRow RowSize=GameService.RowSize Selectors=SelectorCells @ref="SelectorRowRef" OnSendRow="HandleSendRow" />
 </div>
 
 @code{
-    public Cell[] Displayers { get; set; }
-    public Cell[] Selectors { get; set; }
-
+    private Cell[]? SelectorCells { get; set; }
     private SelectorRow SelectorRowRef;
-
 
     // TODO : Why this function is called 3 times ?
     // ANSWER : In _Host.cshtml => An option can be choosed between Server and ServerPreRendered 
     // => the pre rendering call this function once at the launch of the server and once before the user load the page, only then it's the real call
     protected override void OnInitialized()
     {
-        Displayers = new Cell[GameService.RowSize];
-        Displayers[0] = (new Cell(ColorMasterMind.Gray, ColorIndicator.Warning));
-        Displayers[1] = (new Cell(ColorMasterMind.Black, ColorIndicator.Error));
-        Displayers[2] = (new Cell(ColorMasterMind.Blue, ColorIndicator.Success));
-        Displayers[3] = (new Cell(ColorMasterMind.Purple, ColorIndicator.Warning));
-        Displayers[4] = (new Cell(ColorMasterMind.Yellow, ColorIndicator.Warning));
-
-
-        Selectors = Task.Run(() => GameService.GenerateRandomRow()).Result;
+        SelectorCells = Task.Run(() => GameService.GetNewRow()).Result;
         GameService.StartGame();
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomLeft;
     }
 
     private async Task HandleSendRow()
     {
         SelectorRowRef.processing = true;
-        await Task.Run(() => GameService.ProcessRow(Selectors));
-        Console.WriteLine("ALLO");
         await Task.Delay(1000); // Just to flex the processing button :D
+        bool win = false;
+        if (await Task.Run(() => GameService.ProcessRow(SelectorCells, out win)))
+        {
+            SelectorRowRef.finished = true;
+            if (win)
+            {
+                ShowSnackBar("Well play !", Severity.Success, Color.Success);
+            } else
+            {
+                ShowSnackBar("Not that good huh ?", Severity.Error, Color.Error);
+            }
+        } else
+        {
+            SelectorCells = await Task.Run(() => GameService.GetNewRow());
+        }
         SelectorRowRef.processing = false;
+    }
+
+    private void ShowSnackBar(string msg, Severity severity, Color colorButton)
+    {
+        Snackbar.Add(msg, severity, config =>
+        {
+            config.Action = "Play Again";
+            config.ActionColor = colorButton;
+            config.VisibleStateDuration = int.MaxValue;
+            config.Onclick = snackbar =>
+            {
+                NavigationManager.NavigateTo(NavigationManager.Uri);
+                return Task.CompletedTask;
+            };
+        });
     }
 }
